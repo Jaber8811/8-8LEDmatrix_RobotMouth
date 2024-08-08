@@ -1,0 +1,66 @@
+ #include <LedControl.h>
+#include <Adafruit_GFX.h>
+
+const int trig = 9;
+const int echo = 6;
+
+long duration;
+int distance;
+int safe_distance;
+
+int DIN = 12;
+int CS = 11;
+int CLK = 10;
+byte open_M[8]  = {0x00, 0x18, 0x24, 0x42, 0x42, 0x24, 0x18, 0x00};
+byte hopen_M[8] = {0x00, 0x00, 0x3c, 0x42, 0x42, 0x3c, 0x00, 0x00};
+byte copen_M[8] = {0x00, 0x00, 0x00, 0x7e, 0x7e, 0x00, 0x00, 0x00};
+byte n_M[8]     = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+LedControl lc = LedControl(DIN, CLK, CS, 1);  // Initialize the LedControl library
+
+void setup() {
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
+  lc.shutdown(0, false);  // Turn on the display
+  lc.setIntensity(0, 8);  // Set the brightness (0-15)
+  lc.clearDisplay(0);     // Clear the display
+}
+
+void displayPattern(byte pattern[8]) {
+  for (int i = 0; i < 8; i++) {
+    lc.setRow(0, i, pattern[i]);
+  }
+}
+
+void loop() {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+
+  distance = duration * 0.034 / 2;
+  safe_distance = distance;
+
+  if (200<= safe_distance ) {
+    
+    displayPattern(open_M);
+    delay(200);
+    displayPattern(hopen_M);
+    delay(200);
+    displayPattern(copen_M);
+    delay(200);
+    displayPattern(hopen_M);
+    delay(200);
+    displayPattern(open_M);
+  }
+  else{
+        displayPattern(n_M);
+    delay(200);
+
+  }
+}
+
+
+ 
